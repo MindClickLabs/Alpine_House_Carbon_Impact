@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpine House — Impact Story</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pine: #1B3A2D;
+    --sage: #4A7C59;
+    --mist: #A8C5B0;
+    --snow: #F5F3EE;
+    --stone: #8C8478;
+    --cream: #FAFAF7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #111; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
+
+  .deck { width: 100%; max-width: 860px; }
+
+  /* NAV DOTS */
+  .nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 1.2rem; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.2); cursor: pointer; border: none; transition: background 0.2s; }
+  .dot.active { background: var(--mist); }
+
+  /* SLIDE */
+  .slide { display: none; background: var(--cream); border-radius: 20px; overflow: hidden; min-height: 480px; }
+  .slide.active { display: flex; flex-direction: column; }
+
+  /* SLIDE HEADER */
+  .slide-header {
+    background: var(--pine); color: white;
+    padding: 2rem 2.5rem 1.8rem;
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .slide-num { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mist); margin-bottom: 0.5rem; }
+  .slide-title { font-family: 'DM Serif Display', serif; font-size: clamp(26px, 4vw, 38px); line-height: 1.1; color: white; }
+  .slide-title em { font-style: italic; color: var(--mist); }
+  .slide-icon { font-size: 36px; opacity: 0.6; margin-left: 1rem; flex-shrink: 0; }
+
+  /* SLIDE BODY */
+  .slide-body { padding: 2rem 2.5rem; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 1.2rem; }
+
+  /* STAT ROW */
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .stat { background: white; border-radius: 12px; padding: 1.2rem 1.4rem; border: 1px solid rgba(0,0,0,0.07); }
+  .stat-val { font-family: 'DM Serif Display', serif; font-size: 34px; color: var(--pine); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--stone); line-height: 1.4; }
+
+  /* KEY POINT */
+  .key-point { background: white; border-radius: 12px; padding: 1.2rem 1.4rem; border: 1px solid rgba(0,0,0,0.07); display: flex; gap: 1rem; align-items: flex-start; }
+  .kp-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); margin-top: 6px; flex-shrink: 0; }
+  .kp-text { font-size: 14px; color: #333; line-height: 1.6; }
+  .kp-text strong { font-weight: 500; color: var(--pine); }
+
+  /* NARRATIVE BLOCK — slide 0 */
+  .narrative {
+    background: white; border-radius: 12px; padding: 1.8rem 2rem;
+    border: 1px solid rgba(0,0,0,0.07);
+    font-size: 15px; color: #333; line-height: 1.8;
+  }
+  .narrative strong { font-weight: 500; color: var(--pine); }
+
+  /* ROUTE BAR */
+  .route { background: white; border-radius: 12px; padding: 1.2rem 1.4rem; border: 1px solid rgba(0,0,0,0.07); }
+  .route-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; padding: 6px 0; }
+  .route-row + .route-row { border-top: 1px solid rgba(0,0,0,0.06); }
+  .route-from { color: var(--stone); }
+  .route-kg { font-weight: 500; }
+  .red { color: #c0392b; }
+  .green { color: var(--sage); }
+  .route-saved { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.1); font-size: 12px; color: var(--pine); font-weight: 500; }
+
+  /* SLIDE FOOTER */
+  .slide-footer {
+    border-top: 1px solid rgba(0,0,0,0.08);
+    padding: 0.8rem 2.5rem;
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    background: var(--snow);
+  }
+  .source-link { font-size: 11px; color: var(--stone); text-decoration: none; display: flex; align-items: center; gap: 4px; }
+  .source-link:hover { color: var(--sage); text-decoration: underline; }
+  .source-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--mist); }
+
+  /* ARROW BUTTONS */
+  .arrows { display: flex; justify-content: center; gap: 12px; margin-top: 1.2rem; }
+  .arrow-btn {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    color: white; border-radius: 50%; width: 40px; height: 40px;
+    font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .arrow-btn:hover { background: rgba(255,255,255,0.15); }
+  .arrow-btn:disabled { opacity: 0.2; cursor: default; }
+
+  @media (max-width: 560px) {
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .slide-header { padding: 1.5rem; }
+    .slide-body { padding: 1.5rem; }
+    .slide-footer { padding: 0.8rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+  <div class="nav">
+    <button class="dot active" onclick="goTo(0)"></button>
+    <button class="dot" onclick="goTo(1)"></button>
+    <button class="dot" onclick="goTo(2)"></button>
+    <button class="dot" onclick="goTo(3)"></button>
+  </div>
+
+  <!-- SLIDE 0: JACKSON HOLE STORY -->
+  <div class="slide active">
+    <div class="slide-header">
+      <div>
+        <div class="slide-num">Alpine House · Jackson Hole, WY</div>
+        <div class="slide-title">The story for the<br><em>Jackson Hole community</em></div>
+      </div>
+      <div class="slide-icon">🏔️</div>
+    </div>
+    <div class="slide-body">
+      <div class="narrative">
+        Living in Jackson Hole comes with a shared responsibility. We are caretakers of one of the most breathtaking, fragile ecosystems on earth. That's why we're incredibly proud to share that Alpine House has officially saved <strong>921.96 kg of greenhouse gases (CO₂e)</strong>, verified by EPA standards.
+      </div>
+      <div class="narrative">
+        To our local community, we know what matters most isn't just the data — it's the impact on our backyard. This carbon reduction is the equivalent of taking nearly <strong>100 round-trip commuter drives over Teton Pass</strong> off the road. It keeps our mountain air clear, protects the cold winter temperatures our snowpack depends on, and has the same environmental power as growing a <strong>small grove of 15 trees</strong>.
+      </div>
+    </div>
+    <div class="slide-footer">
+      <a class="source-link" href="https://docs.google.com/spreadsheets/d/1rGg9M0gOtqxS5BLVQxUTg88DDR-7VA2-P96QfmLRyMI/edit" target="_blank">
+        <span class="source-dot"></span> Carbon Analysis Spreadsheet
+      </a>
+      <a class="source-link" href="https://prod-useast-a.online.tableau.com/#/site/mindclick/views/EaglePoint-AlpineHouseJacksonHole/Performance" target="_blank">
+        <span class="source-dot"></span> MindClick Tableau Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- SLIDE 1: ENVIRONMENTAL -->
+  <div class="slide">
+    <div class="slide-header">
+      <div>
+        <div class="slide-num">01 of 03 · Environmental responsibility</div>
+        <div class="slide-title">Choosing vintage <em>avoided</em><br>shipping furniture from China</div>
+      </div>
+      <div class="slide-icon">🌿</div>
+    </div>
+    <div class="slide-body">
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-val">922 kg</div>
+          <div class="stat-label">CO₂e avoided — manufacturing + shipping</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">2,360</div>
+          <div class="stat-label">equivalent miles driven (EPA equivalency)</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">15</div>
+          <div class="stat-label">equivalent trees planted (EPA equivalency)</div>
+        </div>
+      </div>
+      <div class="route">
+        <div class="route-label" style="font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--stone);margin-bottom:8px;">🏭 Manufacturing (A3 embodied carbon)</div>
+        <div class="route-row">
+          <span class="route-from">🔴 If manufactured new in China</span>
+          <span class="route-kg red">420 kg CO₂e</span>
+        </div>
+        <div class="route-row">
+          <span class="route-from">🟢 Actual — vintage &amp; reupholstered, no new manufacturing</span>
+          <span class="route-kg green">0 kg CO₂e</span>
+        </div>
+        <div class="route-saved">36 pieces reused means 420 kg CO₂e never emitted at the factory gate.</div>
+      </div>
+      <div class="route">
+        <div class="route-label" style="font-size:11px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--stone);margin-bottom:8px;">🚢 Distribution (shipping)</div>
+        <div class="route-row">
+          <span class="route-from">🔴 If bought new — Guangdong → LA (ocean) → Jackson (truck)</span>
+          <span class="route-kg red">2,517 kg CO₂e</span>
+        </div>
+        <div class="route-row">
+          <span class="route-from">🟢 Actual — New England auctions → Jackson (truck)</span>
+          <span class="route-kg green">2,015 kg CO₂e</span>
+        </div>
+        <div class="route-saved">Skipping the ocean voyage saved 502 kg CO₂e — even though the truck drove further.</div>
+      </div>
+      <div class="key-point">
+        <div class="kp-dot"></div>
+        <div class="kp-text">63% of surface area is <strong>biodegradable, recyclable or reusable</strong> — verified by MindClick. These aren't disposable materials; they're built to last and be reused again.</div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <a class="source-link" href="https://docs.google.com/spreadsheets/d/1rGg9M0gOtqxS5BLVQxUTg88DDR-7VA2-P96QfmLRyMI/edit" target="_blank">
+        <span class="source-dot"></span> Carbon Analysis Spreadsheet
+      </a>
+      <a class="source-link" href="https://prod-useast-a.online.tableau.com/#/site/mindclick/views/EaglePoint-AlpineHouseJacksonHole/Performance" target="_blank">
+        <span class="source-dot"></span> MindClick Tableau Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: COST SAVINGS -->
+  <div class="slide">
+    <div class="slide-header">
+      <div>
+        <div class="slide-num">02 of 03 · Cost savings</div>
+        <div class="slide-title">Vintage wasn't just<br><em>sustainable — it was cheaper</em></div>
+      </div>
+      <div class="slide-icon">💰</div>
+    </div>
+    <div class="slide-body">
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-val">$6,966</div>
+          <div class="stat-label">saved vs. buying new — for 26 rooms</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">$1,100</div>
+          <div class="stat-label">landfill tipping fee avoided for a 150 key hotel</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">$40K+</div>
+          <div class="stat-label">projected savings for a 150-key hotel</div>
+        </div>
+      </div>
+      <div class="key-point">
+        <div class="kp-dot"></div>
+        <div class="kp-text"><strong>$18,320 paid</strong> for 36 pieces of vintage Danish, Swedish and American furniture — vs. an estimated <strong>$25,286</strong> to buy equivalent new products at small-project pricing (including the 15% markup boutique hotels pay vs. large chains).</div>
+      </div>
+      <div class="key-point">
+        <div class="kp-dot"></div>
+        <div class="kp-text">This model <strong>scales linearly</strong>. A 150-key hotel applying the same approach would save over $40,000 and avoid the equivalent of planting 88 trees — without spending more than they would on new.</div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <a class="source-link" href="https://docs.google.com/spreadsheets/d/1rGg9M0gOtqxS5BLVQxUTg88DDR-7VA2-P96QfmLRyMI/edit" target="_blank">
+        <span class="source-dot"></span> Carbon Analysis Spreadsheet
+      </a>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: HEALTH & WELLNESS -->
+  <div class="slide">
+    <div class="slide-header">
+      <div>
+        <div class="slide-num">03 of 03 · Health &amp; wellness</div>
+        <div class="slide-title">A room that's genuinely<br><em>better to be inside</em></div>
+      </div>
+      <div class="slide-icon">🌿</div>
+    </div>
+    <div class="slide-body">
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-val">32%</div>
+          <div class="stat-label">of surface area contributes to a healthier guest experience</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">25%</div>
+          <div class="stat-label">of surface area responsibly sourced</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">64%</div>
+          <div class="stat-label">of surface area is MindClick rated</div>
+        </div>
+      </div>
+      <div class="key-point">
+        <div class="kp-dot"></div>
+        <div class="kp-text"><strong>Vintage furniture has already off-gassed.</strong> New upholstered pieces emit VOCs for months.</div>
+      </div>
+      <div class="key-point">
+        <div class="kp-dot"></div>
+        <div class="kp-text"><strong>Sherwin-Williams paint</strong> is Greenguard certified (strict VOC limits). <strong>Daltile ceramic tile</strong> regulates room temperature naturally and off-gases nothing.</div>
+      </div>
+      <div class="key-point">
+        <div class="kp-dot"></div>
+        <div class="kp-text">Curran's materials each come with a unique story: <strong>Econyl carpet</strong> made 40% from reclaimed fishing nets, and <strong>sisal wallcovering</strong> woven entirely from agave plant fiber.</div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <a class="source-link" href="https://prod-useast-a.online.tableau.com/#/site/mindclick/views/EaglePoint-AlpineHouseJacksonHole/Performance" target="_blank">
+        <span class="source-dot"></span> MindClick Tableau Dashboard
+      </a>
+      <a class="source-link" href="https://docs.google.com/spreadsheets/d/1rGg9M0gOtqxS5BLVQxUTg88DDR-7VA2-P96QfmLRyMI/edit" target="_blank">
+        <span class="source-dot"></span> Carbon Analysis Spreadsheet
+      </a>
+    </div>
+  </div>
+
+  <div class="arrows">
+    <button class="arrow-btn" id="prev" onclick="move(-1)" disabled>←</button>
+    <button class="arrow-btn" id="next" onclick="move(1)">→</button>
+  </div>
+</div>
+
+<script>
+  let cur = 0;
+  const slides = document.querySelectorAll('.slide');
+  const dots = document.querySelectorAll('.dot');
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dots[cur].classList.remove('active');
+    cur = n;
+    slides[cur].classList.add('active');
+    dots[cur].classList.add('active');
+    document.getElementById('prev').disabled = cur === 0;
+    document.getElementById('next').disabled = cur === slides.length - 1;
+  }
+  function move(d) { goTo(Math.max(0, Math.min(slides.length - 1, cur + d))); }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') move(1);
+    if (e.key === 'ArrowLeft') move(-1);
+  });
+</script>
+</body>
+</html>
